@@ -1,50 +1,99 @@
-window.onload = function()
-{
-	document.getElementById("lookup").onclick = OnLookUpButtonClicked;
-}
+window.onload =function() {
 
-function OnLookUpButtonClicked(event)
-{
-	new Ajax.Request("request.php",
-			{
-				method:"get",
-				onSuccess:ShowResult,
-				onFailure: ajaxFailure
-				parameters: {
-					"term": $("term").value,
-					"format": "xml"
-            }
-}
-);
-}
+	word =document.getElementsByTagName('input')[0];
+	button =document.getElementsByTagName('input')[1];
+	getAll =document.getElementsByTagName('input')[2];
 
-function gotResult(ajax) {
-	var root = ajax.responseXML.firstChild;
-	var error = root.getAttribute("error");
-	
-	if (error) {
-		$("result").innerHTML = error;
-	} else {
-		var definition = document.createElement("p");
-		var example = document.createElement("p")
-		var author = document.createElement("p");
-		example.className = "example";
-	
-		var entry = root.getElementsByTagName("entry")[0];
-		var definitionNode = entry.getElementsByTagName("definition")[0];
-		definition.innerHTML = definitionNode.firstChild.nodeValue;
-
-		var exampleNode = entry.getElementsByTagName("example")[0];
-		example.innerHTML = exampleNode.firstChild.nodeValue;
-		author.innerHTML = "- " + entry.getAttribute("author");
-	
-		$("result").innerHTML = "";
-		$("result").appendChild(definition);
-		$("result").appendChild(example);
-		$("result").appendChild(author);
+	button.onclick =function() {
+		ajaxFunction(); 
+		searchRequest();
 	}
 
+	getAll.onclick =function() {
+		getAll.setAttribute('all','true');
+		ajaxFunction(); 
+		getAllDefinitions();
+	}
+};
 
-	function ajaxFailure(ajax){
-	alert(ajax.status + " " + ajax.statusText);
+function ajaxFunction() {
+
+	if (window.XMLHttpRequest) 
+		httprequest =new XMLHttpRequest();
+	else 
+		httprequest =new ActiveXObject('Microsoft.XMLHTTP');
+}
+
+function searchRequest() {
+
+	var url = "request.php?q="+word.value;
+   
+	httprequest.onreadystatechange = processSearch;
+	httprequest.open("GET", url);
+	httprequest.send();
+}
+
+function processSearch() {
+	
+	var output =document.getElementById('result');
+
+	if (httprequest.readyState === XMLHttpRequest.DONE) {
+		if (httprequest.status === 200) {
+		 	response = httprequest.responseText;
+		 	if (response.length <500) {
+		 		output.innerHTML ='<h3> Result </h3>'+response;
+			}
+			else {
+				response ='no result found';
+				output.innerHTML ='<h3> Result </h3>'+response;
+			}
+		}
+	}
+}
+
+function getAllDefinitions() {
+
+	var url = "request.php?q="+getAll.getAttribute('all');
+	httprequest.onreadystatechange = searchAll;
+	httprequest.open("GET", url);
+	httprequest.send();
+}
+
+function searchAll() {
+
+	var output =document.getElementById('result');
+	var list = document.createElement('ol');
+	output.innerHTML ='<h3> Result </h3>';
+
+	if (httprequest.readyState === XMLHttpRequest.DONE) {
+		if (httprequest.status === 200) {
+		 	response = httprequest.responseXML;
+		 	definitions =response.getElementsByTagName('definition');
+            output.appendChild(list);
+         
+            for (var i = 0; i < definitions.length; i++) {
+
+            	var definition =document.createElement('li');
+            	var heading =document.createElement('h3');
+            	var p1 =document.createElement('p');
+            	var p2 =document.createElement('p');
+
+            	var word =document.createTextNode(definitions[i].getAttribute('name'));
+            	heading.appendChild(word);
+				
+				var meaning =document.createTextNode(definitions[i].childNodes[0].nodeValue);
+            	p1.appendChild(meaning);
+
+            	var author =document.createTextNode('-'+definitions[i].getAttribute('author'));
+            	p2.appendChild(author);
+
+                definition.appendChild(heading);
+                definition.appendChild(p1);
+                definition.appendChild(p2);
+                list.appendChild(definition);
+            } 
+		}
+		else 
+			response ='There was a problem with the request, could not get definition';
+	}
 }
