@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+
+<html>
+    <body>
+        
+        <p>DICTIONARY</p>
+        
+        <button onclick= function()>Search</button>
+        
+        <script type="text/javascript">
+      
+          
+    $(document).ready(function(){
+    $("#search").click(function(){
+        $.ajax({
+            type: "GET",
+            url: "request.php",
+            datatype: "html",
+            data: {q: "definition"},
+            success: function(text){
+                alert(text)
+            }
+        });
+    });
+});
+        
+</script>    
+   
+    </body>
+</html>
