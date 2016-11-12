@@ -1,50 +1,26 @@
-window.onload = function()
-{
-	document.getElementById("lookup").onclick = OnLookUpButtonClicked;
-}
-
-function OnLookUpButtonClicked(event)
-{
-	new Ajax.Request("request.php",
-			{
-				method:"get",
-				onSuccess:ShowResult,
-				onFailure: ajaxFailure
-				parameters: {
-					"term": $("term").value,
-					"format": "xml"
-            }
-}
-);
-}
-
-function gotResult(ajax) {
-	var root = ajax.responseXML.firstChild;
-	var error = root.getAttribute("error");
-	
-	if (error) {
-		$("result").innerHTML = error;
-	} else {
-		var definition = document.createElement("p");
-		var example = document.createElement("p")
-		var author = document.createElement("p");
-		example.className = "example";
-	
-		var entry = root.getElementsByTagName("entry")[0];
-		var definitionNode = entry.getElementsByTagName("definition")[0];
-		definition.innerHTML = definitionNode.firstChild.nodeValue;
-
-		var exampleNode = entry.getElementsByTagName("example")[0];
-		example.innerHTML = exampleNode.firstChild.nodeValue;
-		author.innerHTML = "- " + entry.getAttribute("author");
-	
-		$("result").innerHTML = "";
-		$("result").appendChild(definition);
-		$("result").appendChild(example);
-		$("result").appendChild(author);
-	}
-
-
-	function ajaxFailure(ajax){
-	alert(ajax.status + " " + ajax.statusText);
-}
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Web Dev Dictionary</title>
+		<link href="index.css" type="text/css" rel="stylesheet" />
+		<script src="index.js" type="text/javascript"></script>
+	</head>
+	<body>
+		
+	<div style="background-color:blue; height:120px;" >
+			<h1 style="position:relative; top:35px; left:25px;">Web Dev Dictionary </h1>
+		</div>
+		<div style="background-color:grey; height:1000px; position:relative; bottom:10px;" >
+			<p style="margin-left:10px;">
+				Choose a word to define:  ajax, bar, html, css, javscript or php
+			</p>
+			<form action="#" method="GET" style="margin-left:10px;">
+				<input type="text" value ="" placeholder="Enter search term" style="padding:10px; width:10%;" />
+				<input type="button" value ="Search" style="background-color:#238ce0; color:#ffffff; border-radius:15%; padding:5px;" />
+				<input type="button" value ="Get All Definitions" style="background-color:#238ce0; color:#ffffff; border-radius:15%; padding:5px;" />
+			</form>
+			<div id="result" style="border-top:1px solid grey; position:relative; top:5px; width:95%; margin-left:10px;">
+			</div>
+		</div>
+	</body>
+</html>
